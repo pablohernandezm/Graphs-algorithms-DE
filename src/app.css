@@ -1,0 +1,11 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+body{
+ @apply md:max-h-[100lvh]
+}
+body{
+ display: grid;
+ grid-template-rows: max-content 1fr;
+ background-color: brown;
+}
