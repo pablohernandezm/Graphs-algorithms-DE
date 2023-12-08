@@ -1,5 +1,6 @@
 <script lang="ts">
     import {GraphNode} from '$lib'
+    import {action, AppAction} from "$lib/stores";
 
     const cellSize=50;
     let graph:GraphNode[] =[];
@@ -15,17 +16,21 @@
     function handleClick(event: MouseEvent) {
         const x = Math.ceil(event.offsetX);
         const y = Math.ceil(event.offsetY);
-        addNode(new GraphNode({x,y}, graph.length+1, graph.length, graph.length===0, false))
 
-
-        if (!startClick) {
-            startClick = { x, y };
-        } else {
-            endClick = { x, y };
+        if ($action === AppAction.addingNode){
+            addNode(new GraphNode({x,y}, graph.length+1, graph.length, graph.length===0, false))
         }
 
-        if (startClick && endClick) {
-            createArrow(startClick, endClick);
+        if($action === AppAction.addingLink){
+            if (!startClick) {
+                startClick = { x, y };
+            } else {
+                endClick = { x, y };
+            }
+
+            if (startClick && endClick) {
+                createArrow(startClick, endClick);
+            }
         }
     }
 
@@ -78,7 +83,7 @@
 </script>
 
 <main class="overflow-auto w-full bg-gray-800 flex justify-center items-center relative rounded-sm">
-   <button class="contents cursor-default" on:click={handleClick}>
+   <button class="contents cursor-pointer" on:click={handleClick}>
         <svg width="500px" height="500px" class="bg-gray-400 flex-shrink-0 flex-grow-0" bind:this={svg}>
             <defs>
                 <desc>Define the marker</desc>

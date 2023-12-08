@@ -1,5 +1,7 @@
-<script>
-    import {Eraser, Folder, Import, PlusCircle, Save, Workflow} from "lucide-svelte";
+<script lang="ts">
+    import {Pointer, Eraser, Folder, Import, PlusCircle, Save, Workflow} from "lucide-svelte";
+    import {action, AppAction} from "$lib/stores";
+
 </script>
 
 <div class="navbar bg-bunker-950 relative z-50">
@@ -11,7 +13,15 @@
     <div class="flex-none">
         <ul class="menu menu-horizontal px-1">
             <li>
-                <button class="btn btn-ghost">
+                <button class="btn btn-ghost" on:click={()=>{$action=AppAction.default}}>
+                    <Pointer/>
+                    <span class="hidden md:inline-flex">
+                        Puntero
+                    </span>
+                </button>
+            </li>
+            <li>
+                <button class="btn btn-ghost" on:click={()=>{$action=AppAction.addingNode}}>
                     <PlusCircle/>
                     <span class="hidden md:inline-flex">
                         Agregar nodo
@@ -19,7 +29,7 @@
                 </button>
             </li>
             <li>
-                <button class="btn btn-ghost">
+                <button class="btn btn-ghost" on:click={()=>{$action=AppAction.addingLink}}>
                     <Workflow/>
                     <span class="hidden md:inline-flex">
                         Enlazar nodos
@@ -27,7 +37,7 @@
                 </button>
             </li>
             <li>
-                <button class="btn btn-ghost">
+                <button class="btn btn-ghost" on:click={()=>{$action=AppAction.removing}}>
                     <Eraser/>
                     <span class="hidden md:inline-flex">
                         Borrar
