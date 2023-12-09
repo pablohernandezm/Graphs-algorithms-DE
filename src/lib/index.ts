@@ -1,30 +1,34 @@
-export interface CanvasCeil{
+export interface Point{
     x:number
     y:number
 }
 
-
+export enum LinkType{
+    unidirectional=0, bidirectional=1
+}
+export interface GraphLink{
+    node1:number,
+    node2:number,
+    weight:number,
+    type:LinkType
+}
 
 //Inspirado por https://medium.com/tebs-lab/implementations-of-graphs-92eb7f121793
 export class GraphNode{
     #value:number|null;
-    #cell:CanvasCeil|null;
-    #idx:number;
+    #point:Point;
     isSink:boolean;
     isSource:boolean;
 
-    constructor(cell:CanvasCeil, idx:number, value:number|null,  isSource:boolean=false, isSink:boolean=false) {
+    constructor(point:Point, value:number|null,  isSource:boolean=false, isSink:boolean=false) {
         this.#value=value;
-        this.#cell=cell;
-        this.#idx=idx;
+        this.#point=point;
         this.isSink=isSink;
         this.isSource=isSource;
     }
 
-    set cell(cell:CanvasCeil|null){this.#cell=cell;}
-    get cell(){return this.#cell;}
-    set idx(idx:number){this.#idx=idx;}
-    get idx(){return this.#idx}
+    set point(point:Point){this.#point=point;}
+    get point(){return this.#point;}
     set value(value:number|null){this.#value=value;}
     get value(){return this.#value;}
 }
