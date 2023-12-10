@@ -1,15 +1,19 @@
 <script lang="ts">
-    import type {GraphLines, Point} from '$lib'
+    import type {GraphLine, Point} from '$lib'
     import {GraphNode, LineType} from '$lib'
+    import {enhance} from "$app/forms";
     import {action, AppAction} from "$lib/stores";
     import type {Action} from "svelte/action";
+    import {X} from 'lucide-svelte'
 
     const cellSize=50;
     let dragging=false;
 
     let graphNodes:GraphNode[] =[];
-    let graphLines:GraphLines[]=[];
+    let graphLines:GraphLine[]=[];
     let svg:SVGElement
+    let lineModal:HTMLDialogElement;
+
     function addNode(graphNode:GraphNode){
         graphNodes=[...graphNodes, graphNode];
     }
@@ -18,6 +22,7 @@
     let startClick: number=-1;
     let endClick: number=-1;
     let selectedNode:number=-1;
+    let selectedLine:number;
 
     action.subscribe(()=>{
         startClick=-1;
@@ -135,6 +140,14 @@
         }
     }
 
+    const lineEventsHandler=(idx:number)=>{
+        if($action===AppAction.removing){
+            graphLines=graphLines.toSpliced(idx, 1);
+        } else if($action===AppAction.editing){
+            selectedLine=idx;
+            lineModal.showModal();
+        }
+    }
     const nodeMaker:Action<SVGCircleElement, GraphNode>=(circle:SVGCircleElement, node:GraphNode)=>{
         circle.addEventListener('mousedown', ()=>{
             if($action===AppAction.default){
@@ -179,14 +192,15 @@
                                 use:nodeMaker={node}
                                 class="{node.isSource || node.isSink?'fill-anzac-400 stroke-anzac-500':'fill-san-juan-400 stroke-san-juan-700'} stroke-2
                                     {$action===AppAction.default?'hover:cursor-move':
-                                    $action===AppAction.addingLink?'hover:cursor-cell':''}"
+                                    $action===AppAction.addingLink?'hover:cursor-cell':
+                                    $action===AppAction.editing?'hover:cursor-pointer':''}"
                         />
 
                         <text x={node.point.x}
                               y={node.point.y}
                               text-anchor="middle"
                               alignment-baseline="middle"
-                              font-size="{cellSize/2.7}"
+                              font-size="{cellSize/2.4}"
                               fill="purple"
                               class="fill-bunker-950 font-bold pointer-events-none"
                         >
@@ -205,23 +219,19 @@
                 <line {...lineCordsHelper(graphNodes[line.node1], graphNodes[line.node2])}
                       marker-start="{line.type===LineType.bidirectional? 'url(#arrow-reversed)':''}"
                       marker-end="url(#arrow)"
-                      class="stroke-black stroke-[2] {$action===AppAction.removing?'cursor-pointer':''}"
+                      class="stroke-black stroke-[2] {$action===AppAction.removing || $action===AppAction.editing?'cursor-pointer':''}"
                       id="link-{graphNodes.length}-{line.type}"
                       role="presentation"
                       on:click={()=>{
-                        if($action===AppAction.removing){
-                            graphLines=graphLines.toSpliced(i, 1);
-                        }
+                        lineEventsHandler(i);
                       }}
                 />
 
-                <text class="fill-white font-bold text-2xl stroke-black stroke-2 {$action===AppAction.removing?'cursor-pointer':''}"
+                <text class="fill-white font-bold text-3xl stroke-black stroke-2 {$action===AppAction.removing || $action===AppAction.editing?'cursor-pointer':''}"
                       {...lineLabelCordsHelper(graphNodes[line.node1], graphNodes[line.node2])}
                       role="presentation"
                       on:click={()=>{
-                        if($action===AppAction.removing){
-                            graphLines=graphLines.toSpliced(i, 1);
-                        }
+                        lineEventsHandler(i)
                       }}
                 >
                     {line.weight}
@@ -230,3 +240,38 @@
         </svg>
     </button>
 </main>
+
+<dialog id="my_modal_3" class="modal" bind:this={lineModal}>
+    <div class="modal-box">
+        <form method="dialog">
+            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"><X/></button>
+        </form>
+        <h3 class="font-bold text-lg">Editar linea</h3>
+        {#if selectedLine>=0 && graphLines[selectedLine]}
+            <form class="py-4 flex flex-col gap-4" method="post" use:enhance={({cancel, formData})=>{
+                const weightData = formData.get('weight')?.toString();
+
+                if (weightData){
+                    try{
+                        graphLines[selectedLine].weight=parseInt(weightData);
+                        lineModal.close()
+                    } catch (e){//Ignore
+                    }
+                }
+
+                cancel();
+            }}>
+                <div class="flex flex-col gap-2">
+                    <label for="line_weight">Peso</label>
+                    <input type=number name="weight" id="line_weight" class="input input-bordered" min="0" value={graphLines[selectedLine].weight}>
+                </div>
+
+                <button type="submit" class="btn btn-neutral">Guardar</button>
+            </form>
+        {/if}
+    </div>
+
+    <form method="dialog" class="modal-backdrop">
+        <button/>
+    </form>
+</dialog>

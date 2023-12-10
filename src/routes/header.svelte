@@ -1,5 +1,5 @@
 <script lang="ts">
-    import {Pointer, Eraser, Folder, Import, PlusCircle, Save, Workflow} from "lucide-svelte";
+    import {Pointer, Eraser, Folder, Import, PlusCircle, Save, Workflow, PencilRuler} from "lucide-svelte";
     import {action, AppAction} from "$lib/stores";
 
 </script>
@@ -15,7 +15,7 @@
             <li>
                 <button class="btn btn-ghost" on:click={()=>{$action=AppAction.default}}>
                     <Pointer/>
-                    <span class="hidden md:inline-flex">
+                    <span class="hidden lg:inline-flex">
                         Puntero
                     </span>
                 </button>
@@ -23,23 +23,32 @@
             <li>
                 <button class="btn btn-ghost" on:click={()=>{$action=AppAction.addingNode}}>
                     <PlusCircle/>
-                    <span class="hidden md:inline-flex">
-                        Agregar nodo
+                    <span class="hidden lg:inline-flex">
+                        Agregar
                     </span>
                 </button>
             </li>
             <li>
                 <button class="btn btn-ghost" on:click={()=>{$action=AppAction.addingLink}}>
                     <Workflow/>
-                    <span class="hidden md:inline-flex">
-                        Enlazar nodos
+                    <span class="hidden lg:inline-flex">
+                        Enlazar
+                    </span>
+                </button>
+            </li>
+
+            <li>
+                <button class="btn btn-ghost" on:click={()=>{$action=AppAction.editing}}>
+                    <PencilRuler/>
+                    <span class="hidden lg:inline-flex">
+                        Editar
                     </span>
                 </button>
             </li>
             <li>
                 <button class="btn btn-ghost" on:click={()=>{$action=AppAction.removing}}>
                     <Eraser/>
-                    <span class="hidden md:inline-flex">
+                    <span class="hidden lg:inline-flex">
                         Borrar
                     </span>
                 </button>

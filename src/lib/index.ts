@@ -6,7 +6,7 @@ export interface Point{
 export enum LineType{
     unidirectional=0, bidirectional=1
 }
-export interface GraphLines{
+export interface GraphLine {
     node1:number,
     node2:number,
     weight:number,
