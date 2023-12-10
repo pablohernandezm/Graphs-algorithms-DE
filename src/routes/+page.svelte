@@ -205,11 +205,25 @@
                 <line {...lineCordsHelper(graphNodes[line.node1], graphNodes[line.node2])}
                       marker-start="{line.type===LineType.bidirectional? 'url(#arrow-reversed)':''}"
                       marker-end="url(#arrow)"
-                      class="stroke-black stroke-2"
-                      id="link-{graphNodes.length}-{line.type}"/>
+                      class="stroke-black stroke-[2] {$action===AppAction.removing?'cursor-pointer':''}"
+                      id="link-{graphNodes.length}-{line.type}"
+                      role="presentation"
+                      on:click={()=>{
+                        if($action===AppAction.removing){
+                            graphLines=graphLines.toSpliced(i, 1);
+                        }
+                      }}
+                />
 
-                <text class="fill-white font-bold text-2xl stroke-black stroke-2"
-                      {...lineLabelCordsHelper(graphNodes[line.node1], graphNodes[line.node2])}>
+                <text class="fill-white font-bold text-2xl stroke-black stroke-2 {$action===AppAction.removing?'cursor-pointer':''}"
+                      {...lineLabelCordsHelper(graphNodes[line.node1], graphNodes[line.node2])}
+                      role="presentation"
+                      on:click={()=>{
+                        if($action===AppAction.removing){
+                            graphLines=graphLines.toSpliced(i, 1);
+                        }
+                      }}
+                >
                     {line.weight}
                 </text>
             {/each}
