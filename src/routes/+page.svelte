@@ -41,11 +41,15 @@
                 } else {
                     endClick = selectedNode;
                 }
+
+                console.info(`start:${startClick}, end:${endClick}`)
                 if (startClick>=0 && endClick>=0) {
                     let add=true;
                     let type:LineType=LineType.unidirectional;
+
                     for (let i = 0; i < graphLines.length; i++) {
                         const line=graphLines[i];
+
                         if (line.node1===startClick && line.node2===endClick){
                             add=false;
                         } else if(line.node1===endClick && line.node2===startClick){
@@ -131,24 +135,6 @@
         }
     }
 
-    const lineMaker:Action<SVGLineElement, GraphLines> = (line:SVGLineElement, graphLine:GraphLines)=>{
-
-        line.setAttribute("stroke", "black");
-        line.setAttribute("stroke-width", "2");
-        if (graphLine.type===LineType.bidirectional){
-            line.setAttribute("marker-start", "url(#arrow-reversed)");
-        }
-        line.setAttribute("marker-end", "url(#arrow)");
-    }
-
-    const labelMaker:Action<SVGTextElement>=(text:SVGTextElement)=>{
-        text.setAttribute("fill", "white")
-        text.setAttribute("font-size", "25")
-        text.setAttribute("font-weight", "bold")
-        text.setAttribute("stroke", "#323d48")
-        text.setAttribute("stroke-width", "1.5")
-    }
-
     const nodeMaker:Action<SVGCircleElement, GraphNode>=(circle:SVGCircleElement, node:GraphNode)=>{
         circle.addEventListener('mousedown', ()=>{
             if($action===AppAction.default){
@@ -217,9 +203,13 @@
 
             {#each graphLines as line, i (i)}
                 <line {...lineCordsHelper(graphNodes[line.node1], graphNodes[line.node2])}
-                      use:lineMaker="{line}" id="link-{graphNodes.length}"/>
+                      marker-start="{line.type===LineType.bidirectional? 'url(#arrow-reversed)':''}"
+                      marker-end="url(#arrow)"
+                      class="stroke-black stroke-2"
+                      id="link-{graphNodes.length}-{line.type}"/>
 
-                <text use:labelMaker {...lineLabelCordsHelper(graphNodes[line.node1], graphNodes[line.node2])}>
+                <text class="fill-white font-bold text-2xl stroke-black stroke-2"
+                      {...lineLabelCordsHelper(graphNodes[line.node1], graphNodes[line.node2])}>
                     {line.weight}
                 </text>
             {/each}
