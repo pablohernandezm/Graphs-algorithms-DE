@@ -38,10 +38,8 @@
             if(selectedNode>=0){
                 if (startClick<0) {
                     startClick = selectedNode;
-                    console.log(`Startclick: ${startClick}`)
                 } else {
                     endClick = selectedNode;
-                    console.log(`Endclick: ${endClick}`)
                 }
                 if (startClick>=0 && endClick>=0) {
                     let add=true;
@@ -75,11 +73,19 @@
         else if($action === AppAction.removing){
             if (selectedNode>=0){
                 graphLines=graphLines.filter((line)=>line.node1!==selectedNode && line.node2!==selectedNode)
+
+                for (let i = 0; i < graphLines.length; i++) {
+                    if(graphLines[i].node1>=selectedNode){
+                        graphLines[i].node1=graphLines[i].node1-1;
+                    }
+                    if (graphLines[i].node2>=selectedNode){
+                        graphLines[i].node2=graphLines[i].node2-1;
+                    }
+                }
                 graphNodes = graphNodes.toSpliced(selectedNode, 1);
             }
         }
 
-        console.info(graphLines)
         selectedNode=-1;
     }
 
