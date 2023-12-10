@@ -1,17 +1,17 @@
 <script lang="ts">
-    import type {GraphLink, Point} from '$lib'
-    import {GraphNode, LinkType} from '$lib'
+    import type {GraphLines, Point} from '$lib'
+    import {GraphNode, LineType} from '$lib'
     import {action, AppAction} from "$lib/stores";
     import type {Action} from "svelte/action";
 
     const cellSize=50;
     let dragging=false;
 
-    let graph:GraphNode[] =[];
-    let graphLinks:GraphLink[]=[];
+    let graphNodes:GraphNode[] =[];
+    let graphLines:GraphLines[]=[];
     let svg:SVGElement
     function addNode(graphNode:GraphNode){
-        graph=[...graph, graphNode];
+        graphNodes=[...graphNodes, graphNode];
     }
 
 
@@ -31,7 +31,7 @@
         const y = event.clientY-rect.top;
 
         if ($action === AppAction.addingNode){
-            addNode(new GraphNode({x,y}, graph.length, graph.length===0, false))
+            addNode(new GraphNode({x,y}, graphNodes.length, graphNodes.length===0, false))
         }
 
         else if($action === AppAction.addingLink){
@@ -45,14 +45,14 @@
                 }
                 if (startClick>=0 && endClick>=0) {
                     let add=true;
-                    let type:LinkType=LinkType.unidirectional;
-                    for (let i = 0; i < graphLinks.length; i++) {
-                        const link=graphLinks[i];
-                        if (link.node1===startClick && link.node2===endClick){
+                    let type:LineType=LineType.unidirectional;
+                    for (let i = 0; i < graphLines.length; i++) {
+                        const line=graphLines[i];
+                        if (line.node1===startClick && line.node2===endClick){
                             add=false;
-                        } else if(link.node1===endClick && link.node2===startClick){
-                            link.type=LinkType.bidirectional;
-                            graphLinks=graphLinks;
+                        } else if(line.node1===endClick && line.node2===startClick){
+                            line.type=LineType.bidirectional;
+                            graphLines=graphLines;
                             add=false;
                         }
 
@@ -60,14 +60,12 @@
                             break;
                         }
                     }
-
                     if (add){
-                        graphLinks=[
-                            ...graphLinks,
+                        graphLines=[
+                            ...graphLines,
                             {node1:startClick, node2:endClick, weight:0, type}
                         ]
                     }
-
                     startClick = -1;
                     endClick = -1;
                 }
@@ -76,12 +74,12 @@
 
         else if($action === AppAction.removing){
             if (selectedNode>=0){
-                graphLinks=graphLinks.filter((link)=>link.node1!==selectedNode && link.node2!==selectedNode)
-                graph = graph.toSpliced(selectedNode, 1);
+                graphLines=graphLines.filter((line)=>line.node1!==selectedNode && line.node2!==selectedNode)
+                graphNodes = graphNodes.toSpliced(selectedNode, 1);
             }
         }
 
-        console.info(graphLinks)
+        console.info(graphLines)
         selectedNode=-1;
     }
 
@@ -100,32 +98,44 @@
 
         return {start, end}
     }
-    const linkMaker:Action<SVGLineElement, GraphLink> = (line:SVGLineElement,link:GraphLink)=>{
-        const {x:x1, y:y1} = graph[link.node1].point
-        const {x:x2, y:y2} = graph[link.node2].point
 
-        const {start, end} = toFixedPoints({x:x1, y:y1}, {x:x2, y:y2});
+    const lineCordsHelper = (node1:GraphNode, node2:GraphNode)=>{
+        const fixed= toFixedPoints(
+            {x:node1.point.x, y:node1.point.y},
+            {x:node2.point.x, y:node2.point.y}
+        )
 
-        line.setAttribute("x1", String(start.x));
-        line.setAttribute("y1", String(start.y));
-        line.setAttribute("x2", String(end.x));
-        line.setAttribute("y2", String(end.y));
+        return {
+            x1:fixed.start.x,
+            x2:fixed.end.x,
+            y1:fixed.start.y,
+            y2:fixed.end.y
+        }
+    }
+
+    const lineLabelCordsHelper =(node1:GraphNode, node2:GraphNode)=>{
+        const {start, end}=toFixedPoints(
+            {x:node1.point.x, y:node1.point.y},
+            {x:node2.point.x, y:node2.point.y}
+        )
+
+        return{
+            x:String((end.x+start.x)/2),
+            y:String((end.y+start.y)/2)
+        }
+    }
+
+    const lineMaker:Action<SVGLineElement, GraphLines> = (line:SVGLineElement, graphLine:GraphLines)=>{
+
         line.setAttribute("stroke", "black");
         line.setAttribute("stroke-width", "2");
-        if (link.type===LinkType.bidirectional){
+        if (graphLine.type===LineType.bidirectional){
             line.setAttribute("marker-start", "url(#arrow-reversed)");
         }
         line.setAttribute("marker-end", "url(#arrow)");
     }
 
-    const labelMaker:Action<SVGTextElement, GraphLink>=(text:SVGTextElement, link:GraphLink)=>{
-        const {x:x1, y:y1} = graph[link.node1].point
-        const {x:x2, y:y2} = graph[link.node2].point
-
-        const {start, end} = toFixedPoints({x:x1, y:y1}, {x:x2, y:y2});
-
-        text.setAttribute("x", String((end.x+start.x)/2))
-        text.setAttribute("y", String((end.y+start.y)/2))
+    const labelMaker:Action<SVGTextElement>=(text:SVGTextElement)=>{
         text.setAttribute("fill", "white")
         text.setAttribute("font-size", "25")
         text.setAttribute("font-weight", "bold")
@@ -143,7 +153,7 @@
         circle.addEventListener('mousemove', (e:MouseEvent)=>{
             if (dragging){
                 node.point={x:e.offsetX, y:e.offsetY};
-                graph=graph;
+                graphNodes=graphNodes;
             }
         });
 
@@ -167,7 +177,7 @@
                 </marker>
             </defs>
 
-            {#each graph as node, i (i)}
+            {#each graphNodes as node, i (i)}
                 {#if node.point}
                         <circle cx={node.point.x}
                                 cy={node.point.y}
@@ -175,7 +185,7 @@
                                 role="presentation"
                                 on:click={()=>{selectedNode=i}}
                                 use:nodeMaker={node}
-                                class="fill-anzac-400 stroke-anzac-500 stroke-2
+                                class="{node.isSource || node.isSink?'fill-anzac-400 stroke-anzac-500':'fill-san-juan-400 stroke-san-juan-700'} stroke-2
                                     {$action===AppAction.default?'hover:cursor-move':
                                     $action===AppAction.addingLink?'hover:cursor-cell':''}"
                         />
@@ -199,9 +209,13 @@
                 {/if}
             {/each}
 
-            {#each graphLinks as link, i (i)}
-                <line use:linkMaker={link}/>
-                <text use:labelMaker={link}>{link.weight}</text>
+            {#each graphLines as line, i (i)}
+                <line {...lineCordsHelper(graphNodes[line.node1], graphNodes[line.node2])}
+                      use:lineMaker="{line}" id="link-{graphNodes.length}"/>
+
+                <text use:labelMaker {...lineLabelCordsHelper(graphNodes[line.node1], graphNodes[line.node2])}>
+                    {line.weight}
+                </text>
             {/each}
         </svg>
     </button>

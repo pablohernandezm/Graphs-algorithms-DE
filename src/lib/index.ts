@@ -3,14 +3,14 @@ export interface Point{
     y:number
 }
 
-export enum LinkType{
+export enum LineType{
     unidirectional=0, bidirectional=1
 }
-export interface GraphLink{
+export interface GraphLines{
     node1:number,
     node2:number,
     weight:number,
-    type:LinkType
+    type:LineType
 }
 
 //Inspirado por https://medium.com/tebs-lab/implementations-of-graphs-92eb7f121793
