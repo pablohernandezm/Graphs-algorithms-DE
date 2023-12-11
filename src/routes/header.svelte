@@ -181,14 +181,14 @@
     }
 </script>
 
-<div class="navbar bg-bunker-950 relative z-50">
+<div class="navbar bg-bunker-950 relative z-50 flex-wrap flex-col lg:flex-row items-start border-b-2 border-b-gray-500">
     <div class="flex-1">
         <a href="/" class="btn btn-ghost text-2xl">
             MyGraph
         </a>
     </div>
     <div class="flex-none">
-        <ul class="menu menu-horizontal px-1">
+        <ul class="menu menu-horizontal px-1 gap-4 flex-wrap">
             <li>
                 <button class="btn btn-ghost {$action===AppAction.default?'border border-accent text-accent':''}"
                         on:click={()=>{$action=AppAction.default}}
@@ -242,7 +242,7 @@
             </li>
             <li>
                 <details>
-                    <summary>
+                        <summary>
                         <Folder/>
                         <span class="hidden md:inline-flex">
                             Archivo

@@ -1,7 +1,7 @@
 <script>
     import {Play} from "lucide-svelte";
 </script>
-<aside class="flex flex-col w-full md:max-w-[300px] h-full bg-base-300 rounded-sm p-4 justify-start gap-8">
+<aside class="flex flex-col w-full md:max-w-[300px] h-full bg-base-300 rounded-sm p-4 justify-start gap-8 border-r-2 border-r-gray-500">
     <div class="flex flex-col gap-4">
         <h2 class="text-2xl font-bold text-center">Algoritmos</h2>
 

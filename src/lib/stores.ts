@@ -11,3 +11,9 @@ export const graphLines:Writable<GraphLine[]>=writable([]);
 export const diameter:Writable<number>=writable(50);
 export const selectedLine:Writable<number>=writable(-1)
 export const selectedNode:Writable<number>=writable(-1)
+
+interface Dimension{
+    w:number,
+    h:number
+}
+export const canvasSize:Writable<Dimension>=writable({w:500,h:500})
