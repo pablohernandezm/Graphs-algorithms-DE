@@ -16,14 +16,12 @@ export interface GraphLine {
 }
 
 export class GraphNode{
-    #value:number|null;
     #point:Point;
     isSink:boolean;
     isSource:boolean;
     name:string;
 
-    constructor(point:Point, value:number|null,  name:string, isSource:boolean=false, isSink:boolean=false) {
-        this.#value=value;
+    constructor(point:Point,  name:string, isSource:boolean=false, isSink:boolean=false) {
         this.#point=point;
         this.isSink=isSink;
         this.isSource=isSource;
@@ -31,8 +29,6 @@ export class GraphNode{
     }
     set point(point:Point){this.#point=point;}
     get point(){return this.#point;}
-    set value(value:number|null){this.#value=value;}
-    get value(){return this.#value;}
 }
 
 export function fixPointsToRadius(start:Point, end:Point){

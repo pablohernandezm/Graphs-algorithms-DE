@@ -30,7 +30,7 @@
         const y = event.clientY-rect.top;
 
         if ($action === AppAction.addingNode){
-            addNode(new GraphNode({x,y}, $graphNodes.length, `N${$graphNodes.length}`,false, false))
+            addNode(new GraphNode({x,y}, `N${$graphNodes.length}`,false, false))
             $selectedNode=-1;
         }
     }

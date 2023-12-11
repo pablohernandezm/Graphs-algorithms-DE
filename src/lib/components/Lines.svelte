@@ -55,9 +55,11 @@
     <text class="fill-white font-bold text-3xl stroke-black stroke-2 {$action===AppAction.removing || $action===AppAction.editing?'cursor-pointer':''}"
           {...labelCords($graphNodes[line.node1], $graphNodes[line.node2])}
           role="presentation"
+          alignment-baseline="middle"
+          text-anchor="middle"
           on:click|stopPropagation={()=>{
-                        lineEventHandler(i)
-                      }}
+            lineEventHandler(i)
+          }}
     >
         {line.weight}
     </text>
