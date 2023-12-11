@@ -13,6 +13,7 @@
     let graphLines:GraphLine[]=[];
     let svg:SVGElement
     let lineModal:HTMLDialogElement;
+    let nodeModal:HTMLDialogElement;
 
     function addNode(graphNode:GraphNode){
         graphNodes=[...graphNodes, graphNode];
@@ -36,7 +37,8 @@
         const y = event.clientY-rect.top;
 
         if ($action === AppAction.addingNode){
-            addNode(new GraphNode({x,y}, graphNodes.length, graphNodes.length===0, false))
+            addNode(new GraphNode({x,y}, graphNodes.length, `N${graphNodes.length}`,false, false))
+            selectedNode=-1;
         }
 
         else if($action === AppAction.addingLink){
@@ -77,6 +79,7 @@
                     endClick = -1;
                 }
             }
+            selectedNode=-1;
         }
 
         else if($action === AppAction.removing){
@@ -93,9 +96,13 @@
                 }
                 graphNodes = graphNodes.toSpliced(selectedNode, 1);
             }
+
+            selectedNode=-1;
         }
 
-        selectedNode=-1;
+        else if($action===AppAction.editing){
+            nodeModal.showModal();
+        }
     }
 
     function toFixedPoints(start:Point, end:Point){
@@ -188,12 +195,14 @@
                                 cy={node.point.y}
                                 r={Math.ceil(cellSize/2)}
                                 role="presentation"
-                                on:click={()=>{selectedNode=i}}
                                 use:nodeMaker={node}
                                 class="{node.isSource || node.isSink?'fill-anzac-400 stroke-anzac-500':'fill-san-juan-400 stroke-san-juan-700'} stroke-2
                                     {$action===AppAction.default?'hover:cursor-move':
                                     $action===AppAction.addingLink?'hover:cursor-cell':
                                     $action===AppAction.editing?'hover:cursor-pointer':''}"
+                                on:click={()=>{
+                                    selectedNode=i;
+                                }}
                         />
 
                         <text x={node.point.x}
@@ -208,6 +217,8 @@
                                 S
                             {:else if node.isSink}
                                 T
+                            {:else if node.name.length>0}
+                                {node.name}
                             {:else}
                                 N{i+1}
                             {/if}
@@ -241,7 +252,7 @@
     </button>
 </main>
 
-<dialog id="my_modal_3" class="modal" bind:this={lineModal}>
+<dialog class="modal" bind:this={lineModal}>
     <div class="modal-box">
         <form method="dialog">
             <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"><X/></button>
@@ -264,6 +275,98 @@
                 <div class="flex flex-col gap-2">
                     <label for="line_weight">Peso</label>
                     <input type=number name="weight" id="line_weight" class="input input-bordered" min="0" value={graphLines[selectedLine].weight}>
+                </div>
+
+                <button type="submit" class="btn btn-neutral">Guardar</button>
+            </form>
+        {/if}
+    </div>
+
+    <form method="dialog" class="modal-backdrop">
+        <button/>
+    </form>
+</dialog>
+
+<dialog class="modal" bind:this={nodeModal}>
+    <div class="modal-box">
+        <form method="dialog">
+            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"><X/></button>
+        </form>
+        <h3 class="font-bold text-lg">Editar nodo</h3>
+        {#if selectedNode>=0}
+            <form class="py-4 flex flex-col gap-4" method="post" use:enhance={({cancel, formData})=>{
+                const nameData = formData.get('name');
+                const typeData = formData.get('type');
+
+                if (nameData && typeData){
+                    try{
+                        const name=nameData.toString();
+                        const type=typeData.toString();
+
+                        graphNodes[selectedNode].name=name;
+
+                        switch (type){
+                            case 'normal':
+                                graphNodes[selectedNode].isSink=false;
+                                graphNodes[selectedNode].isSource=false;
+                                break;
+                            case 'fuente':
+                                graphNodes.forEach((node)=>{
+                                    if(node.isSource){node.isSource=false}
+                                })
+
+                                graphNodes[selectedNode].isSource=true;
+                                graphNodes[selectedNode].isSink=false;
+                                break;
+                            case 'sumidero':
+                                graphNodes.forEach((node)=>{
+                                    if (node.isSink){node.isSink=false}
+                                })
+
+                                graphNodes[selectedNode].isSource=false;
+                                graphNodes[selectedNode].isSink=true;
+                                break;
+                        }
+                        selectedNode=-1;
+                        graphNodes=graphNodes;
+                        nodeModal.close();
+                    } catch (e){//Ignore
+                    }
+                }
+
+                cancel();
+            }}>
+                <div class="flex flex-col gap-4">
+                    <fieldset class="flex flex-col gap-2">
+                        <label for="node_name">Nombre</label>
+                        <input type=text name="name" id="node_name" class="input input-bordered" value={graphNodes[selectedNode].name}>
+                    </fieldset>
+
+                    <fieldset>
+                        <legend>Tipo de nodo</legend>
+                        <div class="flex gap-6 py-4">
+                            <div class="flex gap-4 items-center">
+                                <input type="radio" name="type" value="normal" id="type_1" checked={!graphNodes[selectedNode].isSink && !graphNodes[selectedNode].isSource}
+                                    class="radio radio-accent"
+                                >
+                                <label for="type_1">Nodo normal</label>
+                            </div>
+
+                            <div class="flex gap-4 items-center">
+                                <input type="radio" name="type" value="fuente" id="type_2" checked={graphNodes[selectedNode].isSource}
+                                    class="radio radio-accent"
+                                >
+                                <label for="type_2">Nodo fuente</label>
+                            </div>
+
+                            <div class="flex gap-4 items-center">
+                                <input type="radio" name="type" value="sumidero" id="type_3" checked={graphNodes[selectedNode].isSink}
+                                    class="radio radio-accent"
+                                >
+                                <label for="type_3">Sumidero</label>
+                            </div>
+                        </div>
+                    </fieldset>
                 </div>
 
                 <button type="submit" class="btn btn-neutral">Guardar</button>

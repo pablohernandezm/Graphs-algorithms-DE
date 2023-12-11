@@ -13,20 +13,20 @@ export interface GraphLine {
     type:LineType
 }
 
-//Inspirado por https://medium.com/tebs-lab/implementations-of-graphs-92eb7f121793
 export class GraphNode{
     #value:number|null;
     #point:Point;
     isSink:boolean;
     isSource:boolean;
+    name:string;
 
-    constructor(point:Point, value:number|null,  isSource:boolean=false, isSink:boolean=false) {
+    constructor(point:Point, value:number|null,  name:string, isSource:boolean=false, isSink:boolean=false) {
         this.#value=value;
         this.#point=point;
         this.isSink=isSink;
         this.isSource=isSource;
+        this.name=name;
     }
-
     set point(point:Point){this.#point=point;}
     get point(){return this.#point;}
     set value(value:number|null){this.#value=value;}
