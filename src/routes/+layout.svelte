@@ -2,18 +2,10 @@
     import '../app.css'
     import Header from './header.svelte'
     import Aside from './aside.svelte'
-    import {setContext} from 'svelte'
-    import type {AppAction} from "$lib";
-
-
-    let action:AppAction;
-
-    function setAction(new_action:AppAction){action=new_action}
-    function getAction(){return action;}
-
-    setContext('action', {
-        setAction,
-        getAction
+    import {selectedNode, selectedLine, action} from "$lib/stores";
+    action.subscribe(()=>{
+        $selectedLine=-1;
+        $selectedNode=-1;
     })
 </script>
 
