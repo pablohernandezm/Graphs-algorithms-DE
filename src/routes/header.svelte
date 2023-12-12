@@ -1,8 +1,10 @@
 <script lang="ts">
     import {saveAs} from 'file-saver';
     import {Eraser, Folder, Import, PencilRuler, PlusCircle, Pointer, Save, Workflow} from "lucide-svelte";
-    import {action, AppAction, graphLines, graphNodes} from "$lib/stores";
+    import {action, AppAction, graphLines, graphNodes, diameter, canvasSize} from "$lib/stores";
     import {type GraphLine, GraphNode, LineType} from "$lib";
+    let maxW=0;
+    let maxH=0;
 
     function saveXml(){
         let xmlDoc = document.implementation.createDocument(null, 'automaton', null);
@@ -95,6 +97,15 @@
                             saveLine(node)
                         }
                     });
+
+                    if(maxW> $canvasSize.w){
+                        $canvasSize.w=maxW;
+                    }
+
+                    if(maxH>$canvasSize.h){
+                        $canvasSize.h=maxH;
+                    }
+
                 }
             }
         }
@@ -133,6 +144,13 @@
             })
 
             if(x!==null && y!==null && name){
+                if(x+($diameter/2)+10>maxW){
+                    maxW=x+($diameter/2)+10;
+                }
+
+                if(y+($diameter/2)+10>maxW){
+                    maxH=y+($diameter/2)+10;
+                }
                 $graphNodes=[...$graphNodes, new GraphNode({x,y}, name, isSource, isSink)]
             }
         }
